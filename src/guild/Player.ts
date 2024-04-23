@@ -1,9 +1,8 @@
 import { EventEmitter } from 'events';
 import { Node } from '../node/Node';
 import { Connection } from './Connection';
-import { OpCodes, State, ShoukakuDefaults } from '../Constants';
+import { OpCodes, State } from '../Constants';
 import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { time } from 'console';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';

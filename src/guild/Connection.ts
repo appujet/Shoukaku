@@ -230,6 +230,17 @@ export class Connection extends EventEmitter {
     }
 
     /**
+     * 
+     * @param channelId The channelId to set for voice (voice move)
+     */
+    public setVoiceChannel(channelId: string): void {
+        this.channelId = channelId;
+        this.sendVoiceUpdate();
+        this.debug(`[Voice] -> [Discord] : Channel Moved | Channel: ${this.channelId} Guild: ${this.guildId}`);
+        this.connect();
+    }
+    
+    /**
      * Send data to Discord
      * @param data The data to send
      * @internal
