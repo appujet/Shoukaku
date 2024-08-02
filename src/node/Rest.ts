@@ -355,6 +355,7 @@ export class Rest {
      * Make a request to Lavalink
      * @param fetchOptions.endpoint Lavalink endpoint
      * @param fetchOptions.options Options passed to fetch
+     * @throws `RestError` when encountering a Lavalink error response
      * @internal
      */
     protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
@@ -390,16 +391,48 @@ export class Rest {
         if (!request.ok) {
             const response = await request
                 .json()
-                .catch(() => null);
-            if (!response?.message)
-                throw new Error(`Rest request failed with response code: ${request.status}`);
-            else
-                throw new Error(`Rest request failed with response code: ${request.status} | message: ${response.message}`);
+                .catch(() => null) as LavalinkRestError | null;
+            throw new RestError(response ?? {
+                timestamp: Date.now(),
+                status: request.status,
+                error: 'Unknown Error',
+                message: 'Unexpected error response from Lavalink server',
+                path: endpoint,
+            });
         }
         try {
             return await request.json() as T;
         } catch {
             return;
         }
+    }
+}
+
+interface LavalinkRestError {
+    timestamp: number;
+    status: number;
+    error: string;
+    trace?: string;
+    message: string;
+    path: string;
+}
+
+export class RestError extends Error {
+    public timestamp: number;
+    public status: number;
+    public error: string;
+    public trace?: string;
+    public path: string;
+
+    constructor({ timestamp, status, error, trace, message, path }: LavalinkRestError) {
+        super(`Rest request failed with response code: ${status}${message ? ` | message: ${message}` : ''}`);
+        this.name = 'RestError';
+        this.timestamp = timestamp;
+        this.status = status;
+        this.error = error;
+        this.trace = trace;
+        this.message = message;
+        this.path = path;
+        Object.setPrototypeOf(this, new.target.prototype);
     }
 }
